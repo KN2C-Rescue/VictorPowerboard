@@ -11,38 +11,62 @@
 
 
 #include "define.hpp"
+#include <cstdlib>
 
 extern	int test;
-extern	int  	DepackCounter;
-extern	int  	LastTimeDataRecived;
-extern	int  	PowerEn;
-extern	int  	FanEn;
+extern	int  	lastTimeDataRecived;
+extern	int  	powerEn;
+extern	int  	fanEn;
 extern	int  	LEDEn;
 extern	int 	data_is_recived;
 extern	int  	indexx;
-extern	int 	ChassisCurrrent;
-extern	int 	LogicCurrent;
-extern	int  	TeknicCurrent;
-extern	int 	ArmCurrent;
-extern	int		EmPoweroff;
-extern	int 	RobotisShutdown;
+extern	int 	chassisCurrrent;
+extern	int 	logicCurrent;
+extern	int  	teknicCurrent;
+extern	int 	armCurrent;
+extern	int		emPoweroff;
+extern	int 	robotisShutdown;
 
-extern	double  	BatteryVoltage;
+extern	double  	batteryVoltage;
 
-
-extern 	uint8_t 	rec;
-extern 	uint8_t 	Chassis_Recive[Chassis_Recive_len];
-extern 	uint8_t 	Chassis_Transmit[Chassis_Transmit_len];
-extern	uint8_t		PowerByte;
-extern 	uint8_t 	Reset;
-extern 	uint8_t 	ChassisDisArm;
-extern 	uint8_t 	Shutdown;
-extern 	uint8_t 	ChassisEn;
-extern 	uint8_t 	ShutdownPressed;
-extern 	uint8_t 	ArmPower;
+extern	uint8_t		powerByte;
+extern 	uint8_t 	reset;
+extern 	uint8_t 	chassisDisArm;
+extern 	uint8_t 	shutdown;
+extern 	uint8_t 	chassisEn;
+extern 	uint8_t 	shutdownPressed;
+extern 	uint8_t 	armPower;
 
 extern	uint16_t 	adcRaw[5];
 
 
+struct _PacketParam
+{
+	char firstHeader;
+	char secondHeader;
+	int depackCounter ;
+	int receiveLenght;
+	int transmitLenght;
+	uint8_t* receiveData;
+	uint8_t* transmitData;
+	uint8_t receiveHeader;
+	UART_HandleTypeDef *huart;
+
+
+	_PacketParam(UART_HandleTypeDef *_huart,char _firstHeader,char _secondHeader,int _receiveLenght, int _transmitLenght)
+	{
+		firstHeader = _firstHeader;
+		secondHeader = _secondHeader;
+
+		receiveLenght = _receiveLenght;
+		transmitLenght = _transmitLenght;
+		receiveData = (uint8_t*) malloc(receiveLenght * sizeof(uint8_t));
+		transmitData = (uint8_t*) malloc(transmitLenght * sizeof(uint8_t));
+		huart = _huart;
+
+	}
+};
+
+extern struct _PacketParam PacketChassis;
 
 #endif /* INC_VARIABLES_HPP_ */

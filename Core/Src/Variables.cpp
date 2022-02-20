@@ -5,38 +5,35 @@
  *      Author: Joker
  */
 
-
-
-
+#include "usart.h"
 #include "Variables.hpp"
 
 	int test=0;
-	int  	DepackCounter=0;
-	int  	LastTimeDataRecived=0;
-	int  	PowerEn;
-	int  	FanEn;
+	int  	lastTimeDataRecived=0;
+	int  	powerEn;
+	int  	fanEn;
 	int  	LEDEn;
 	int 	data_is_recived=0;
 	int  	indexx=0;
-	int 	ChassisCurrrent;
-	int 	LogicCurrent;
-	int  	TeknicCurrent;
-	int 	ArmCurrent;
-	int		EmPoweroff=0;
-	int 	RobotisShutdown=0;
+	int 	chassisCurrrent;
+	int 	logicCurrent;
+	int  	teknicCurrent;
+	int 	armCurrent;
+	int		emPoweroff=0;
+	int 	robotisShutdown=0;
 
-	double  	BatteryVoltage;
+	double  	batteryVoltage;
 
-	uint8_t 	rec;
-	uint8_t 	Chassis_Recive[Chassis_Recive_len];
-	uint8_t		PowerByte;
-	uint8_t 	Chassis_Transmit[Chassis_Transmit_len];
-	uint8_t 	Reset=0;
-	uint8_t 	ChassisDisArm=0;
-	uint8_t 	Shutdown=0;
-	uint8_t 	ChassisEn=1;
-	uint8_t 	ShutdownPressed=0;
-	uint8_t 	ArmPower=1;
+
+	uint8_t		powerByte;
+	uint8_t 	reset=0;
+	uint8_t 	chassisDisArm=0;
+	uint8_t 	shutdown=0;
+	uint8_t 	chassisEn=1;
+	uint8_t 	shutdownPressed=0;
+	uint8_t 	armPower=1;
 
 	uint16_t 	adcRaw[5]={0};
 
+
+struct _PacketParam PacketChassis (&huart1,'C','P',CP_len,	PC_len);

@@ -21,18 +21,18 @@
 
 
 
-extern 	void 		depack(int first_header_byte,int second_header_byte,int* packet_counter,uint8_t* Rec,UART_HandleTypeDef *huart);
-extern 	void 		hipHop							(void)	;
-extern	void 		assignData					(void)	;
-extern	void 		stopRobot						(void)	;
-extern	void 		send2Chassis				(void)	;
-extern	void 		shutdown						(void)	;
-extern	void 		checkShutdown				(void)	;
-extern	void 		powerOff						(void)	;
-extern	void 		powerOn							(void)	;
-extern	void		sendShutdownReq			(void)	;
-extern	void 		checkReset					(void)	;
-extern	void 		adcConv							(void)	;
+extern 	void 		Depack (struct _PacketParam* PacketParam);
+extern 	void 		HipHop (void)	;
+extern	void 		AssignData (int PacketType)	;
+extern	void 		StopRobot (void)	;
+extern	void 		Send2Chassis (void)	;
+extern	void 		Shutdown (void)	;
+extern	void 		CheckShutdown (void)	;
+extern	void 		PowerOff (void)	;
+extern	void 		PowerOn	(void)	;
+extern	void		SendShutdownReq	(void)	;
+extern	void 		CheckReset (void)	;
+extern	void 		AdcConv (void)	;
 
 #endif
 

@@ -65,7 +65,7 @@ void HAL_TIM_PeriodElapsedCallback	(TIM_HandleTypeDef *htim)
 	if(htim->Instance==TIM1)
 		{
 		//this timer gives an interrupt every 10ms
-			 LastTimeDataRecived++;//this variable must be inside the Controling loop and be plused every 10ms
+			 lastTimeDataRecived++;//this variable must be inside the Controling loop and be plused every 10ms
 //					 if(LastTimeDataRecived>=10){stopRobot();}  //stops the motors if no data were recived for a long while
 
 
@@ -74,7 +74,10 @@ void HAL_TIM_PeriodElapsedCallback	(TIM_HandleTypeDef *htim)
 }
 void HAL_UART_RxCpltCallback	(UART_HandleTypeDef *huart	)
 {
-//	depack('C','P',&DepackCounter,&rec,&huart1);
+	if(huart->Instance	==	UsartChassis)
+	{
+		Depack(&PacketChassis);
+	}
 
 
 }
@@ -114,7 +117,7 @@ int main(void)
   MX_TIM1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-	hipHop();
+	HipHop();
 	HAL_ADC_Start_DMA				(&hadc1,(uint32_t *)adcRaw,5)			;
 	HAL_TIM_Base_Start_IT		(&htim1)											;	//10 ms Timer
 
@@ -131,9 +134,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		HAL_Delay (1);
-		adcConv();
-		checkShutdown();
-		checkReset();
+		AdcConv();
+		CheckShutdown();
+		CheckReset();
   }
   /* USER CODE END 3 */
 }

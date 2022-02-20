@@ -1,75 +1,116 @@
 #include "Functions.hpp"
 
-void 	send2Chassis(void)
+void 	Send2Chassis(void)
 {
-	Chassis_Transmit[0]	=	'P'	;
-	Chassis_Transmit[1]	=	'C'	;
-	Chassis_Transmit[2]	=	'd'	;
-	Chassis_Transmit[3]	=	PowerByte	;
-	Chassis_Transmit[4]	=	(int)(BatteryVoltage*10.0)	;
-	Chassis_Transmit[5]	=	LogicCurrent;
-	Chassis_Transmit[6]	=	TeknicCurrent;
-	Chassis_Transmit[7]	=	ArmCurrent;
-	Chassis_Transmit[8]	=	ChassisCurrrent;
-
-	Chassis_Transmit[Chassis_Transmit_len-1]	=	'\r'	;
-
-	HAL_UART_Transmit(&huart1, Chassis_Transmit, Chassis_Transmit_len, 10);
+//	Chassis_Transmit[0]	=	'P'	;
+//	Chassis_Transmit[1]	=	'C'	;
+//	Chassis_Transmit[2]	=	'd'	;
+//	Chassis_Transmit[3]	=	PowerByte	;
+//	Chassis_Transmit[4]	=	(int)(BatteryVoltage*10.0)	;
+//	Chassis_Transmit[5]	=	LogicCurrent;
+//	Chassis_Transmit[6]	=	TeknicCurrent;
+//	Chassis_Transmit[7]	=	ArmCurrent;
+//	Chassis_Transmit[8]	=	ChassisCurrrent;
+//
+//	Chassis_Transmit[Chassis_Transmit_len-1]	=	'\r'	;
+//
+//	HAL_UART_Transmit(&huart1, Chassis_Transmit, Chassis_Transmit_len, 10);
 }
 
-void 	assignData(void)
+void 	AssignData(struct _PacketParam* packetParam)
 {
-	if(Chassis_Recive[Chassis_Recive_len-1]=='\r')
+
+	emPoweroff			= (	packetParam->receiveData[0] & 0x01	) >> 	0	; //0b00000001
+	shutdown			= (	packetParam->receiveData[0] & 0x02	) >> 	1	; //0b00000010
+	chassisDisArm		= (	packetParam->receiveData[0] & 0x04	) >> 	2	;	//0b00000100
+	reset				= (	packetParam->receiveData[0] & 0x08	) >> 	3	;	//0b00001000
+	armPower			= (	packetParam->receiveData[0] & 0x10	) >> 	4	;	//0b00010000
+	chassisEn			= (	packetParam->receiveData[0] & 0x20	) >> 	5	;	//0b00000100
+
+	if(emPoweroff)
 	{
-		EmPoweroff			= (	Chassis_Recive[0] & 0x01	) >> 	0	; //0b00000001
-		Shutdown				=	(	Chassis_Recive[0] & 0x02	) >> 	1	; //0b00000010
-		ChassisDisArm		= (	Chassis_Recive[0] & 0x04	) >> 	2	;	//0b00000100
-		Reset						=	(	Chassis_Recive[0] & 0x08	) >> 	3	;	//0b00001000
-		ArmPower				= (	Chassis_Recive[0] & 0x10	) >> 	4	;	//0b00010000
-		ChassisEn				= (	Chassis_Recive[0] & 0x20	) >> 	5	;	//0b00000100
-
-		if(EmPoweroff)	{powerOff();}
-		if(Shutdown)		{shutdown();}
-		if(ArmPower)		{En_Arm_on;}
-		else 	if(!ArmPower)		{En_Arm_off;}
-		if(ChassisEn)		{En_Chassis_on;}
-		else 	if(!ChassisEn)	{En_Chassis_off;}
-
-		send2Chassis();
-
-		for(int i=0; i<Chassis_Recive_len;	i++)	{Chassis_Recive[i]=0;}
+		PowerOff();
+	}
+	if(shutdown)
+	{
+		Shutdown();
+	}
+	if(armPower)
+	{
+		En_Arm_on;
+	}
+	else if(!armPower)
+	{
+		En_Arm_off;
+	}
+	if(chassisEn)
+	{
+		En_Chassis_on;
+	}
+	else 	if(!chassisEn)
+	{
+		En_Chassis_off;
 	}
 
+	Send2Chassis();
+
+
 }
 
-void 	depack(int first_header_byte,int second_header_byte,int* packet_counter,uint8_t* Rec,UART_HandleTypeDef *huart)
+void 	Depack(struct _PacketParam* packetParam)
 {
 
-	switch(*packet_counter)
-	{	case 0:
-		if(data_is_recived) 								{data_is_recived=0; assignData();	}
-		else if((*Rec)==first_header_byte) 	{	(*packet_counter)++;						}
-		else                       					{	(*packet_counter)=0;						}
-		HAL_UART_Receive_IT(huart, Rec, 1);
+	switch(packetParam->depackCounter)
+	{
+	case 0:
+		if(packetParam->receiveHeader==packetParam->firstHeader)
+		{
+			packetParam->depackCounter++;
+		}
+		else
+		{
+			packetParam->depackCounter =0;
+		}
+
+		HAL_UART_Receive_IT(packetParam->huart, &packetParam->receiveHeader, 1);
+
 		break;
 
 	case 1:
-		if((*Rec)==second_header_byte) {	(*packet_counter)++;			}
-		else 												{	(*packet_counter)=0;			}
-		HAL_UART_Receive_IT(huart, Rec, 1);
+		if(packetParam->receiveHeader==packetParam->secondHeader)
+		{
+			packetParam->depackCounter++;
+			HAL_UART_Receive_IT(packetParam->huart, packetParam->receiveData	, packetParam->receiveLenght);
+
+		}
+		else if(packetParam->receiveHeader==packetParam->firstHeader )
+		{
+			packetParam->depackCounter=1;
+			HAL_UART_Receive_IT(packetParam->huart, &packetParam->receiveHeader, 1);
+		}
+		else
+		{
+			packetParam->depackCounter=0;
+			HAL_UART_Receive_IT(packetParam->huart,&packetParam->receiveHeader, 1);
+		}
+
+
 		break;
 
 	case 2:
-		if(first_header_byte=='M')	{	HAL_UART_Receive_IT(&huart1, Chassis_Recive, Chassis_Recive_len);
-		data_is_recived=yes;
-		LastTimeDataRecived=0;
-		}
-		else 												{	HAL_UART_Receive_IT(huart, Rec , 1	);}
-		(*packet_counter)=0;
+
+
+		if( packetParam->receiveData[ packetParam->receiveLenght - 1 ] == '\r' )
+			AssignData(packetParam);
+
+		packetParam->depackCounter=0;
+		HAL_UART_Receive_IT(packetParam->huart, &packetParam->receiveHeader, 1);
+
+
 		break;
 	}
 }
-void 	hipHop(void)
+void 	HipHop(void)
 {
 	for(int i=0;i<8;i++)
 	{
@@ -80,51 +121,51 @@ void 	hipHop(void)
 	}
 }
 
-void 	stopRobot(void)
+void 	StopRobot(void)
 {
 	En_Arm_off;
 	En_Chassis_off;
 }
 
-void 	shutdown(void)
+void 	Shutdown(void)
 {
-	hipHop();
+	HipHop();
 	for(int i=0	;	i<3	;	i++)
-	{sendShutdownReq();}
+	{SendShutdownReq();}
 	HAL_Delay(10000);
-	hipHop();
-	powerOff();
-	RobotisShutdown=yes;
+	HipHop();
+	PowerOff();
+	robotisShutdown=yes;
 }
-void	sendShutdownReq(void)
+void	SendShutdownReq(void)
 {
-	Chassis_Transmit[0] |=	0x02;
-	send2Chassis();
+//	Chassis_Transmit[0] |=	0x02;
+	Send2Chassis();
 }
-void 	checkShutdown(void)
+void 	CheckShutdown(void)
 {
-	if(	(isShutdownPressed	&&	!RobotisShutdown)	||	(Shutdown	&&	!RobotisShutdown)	)
-	{ShutdownPressed++;
-	if(ShutdownPressed>50)
-	{shutdown();}
+	if(	(isShutdownPressed	&&	!robotisShutdown)	||	(shutdown	&&	!robotisShutdown)	)
+	{shutdownPressed++;
+	if(shutdownPressed>50)
+	{Shutdown();}
 	}
 	else if(!isShutdownPressed)
-	{powerOn();RobotisShutdown=no;}
+	{PowerOn();robotisShutdown=no;}
 }
 
-void 	powerOff(void)
+void 	PowerOff(void)
 {
 	En_Arm_off;
 	En_Chassis_off;
 }
-void 	powerOn(void)
+void 	PowerOn(void)
 {
 	En_Arm_on;
 	En_Chassis_on;
 }
-void 	checkReset(void)
+void 	CheckReset(void)
 {
-	if(Reset)	{
+	if(reset)	{
 		En_Arm_off;
 		En_Chassis_off;
 		HAL_Delay(3000);
@@ -132,7 +173,7 @@ void 	checkReset(void)
 		En_Chassis_on;
 	}
 }
-void 	adcConv(void)
+void 	AdcConv(void)
 {
-	BatteryVoltage	=	(RawBattery/161.0)	+	0.4	;
+	batteryVoltage	=	(RawBattery/161.0)	+	0.4	;
 }
