@@ -2,19 +2,19 @@
 
 void 	Send2Chassis(void)
 {
-//	Chassis_Transmit[0]	=	'P'	;
-//	Chassis_Transmit[1]	=	'C'	;
-//	Chassis_Transmit[2]	=	'd'	;
-//	Chassis_Transmit[3]	=	PowerByte	;
-//	Chassis_Transmit[4]	=	(int)(BatteryVoltage*10.0)	;
-//	Chassis_Transmit[5]	=	LogicCurrent;
-//	Chassis_Transmit[6]	=	TeknicCurrent;
-//	Chassis_Transmit[7]	=	ArmCurrent;
-//	Chassis_Transmit[8]	=	ChassisCurrrent;
-//
-//	Chassis_Transmit[Chassis_Transmit_len-1]	=	'\r'	;
-//
-//	HAL_UART_Transmit(&huart1, Chassis_Transmit, Chassis_Transmit_len, 10);
+	//	Chassis_Transmit[0]	=	'P'	;
+	//	Chassis_Transmit[1]	=	'C'	;
+	//	Chassis_Transmit[2]	=	'd'	;
+	//	Chassis_Transmit[3]	=	PowerByte	;
+	//	Chassis_Transmit[4]	=	(int)(BatteryVoltage*10.0)	;
+	//	Chassis_Transmit[5]	=	LogicCurrent;
+	//	Chassis_Transmit[6]	=	TeknicCurrent;
+	//	Chassis_Transmit[7]	=	ArmCurrent;
+	//	Chassis_Transmit[8]	=	ChassisCurrrent;
+	//
+	//	Chassis_Transmit[Chassis_Transmit_len-1]	=	'\r'	;
+	//
+	//	HAL_UART_Transmit(&huart1, Chassis_Transmit, Chassis_Transmit_len, 10);
 }
 
 void 	AssignData(struct _PacketParam* packetParam)
@@ -26,6 +26,7 @@ void 	AssignData(struct _PacketParam* packetParam)
 	reset				= (	packetParam->receiveData[0] & 0x08	) >> 	3	;	//0b00001000
 	armPower			= (	packetParam->receiveData[0] & 0x10	) >> 	4	;	//0b00010000
 	chassisEn			= (	packetParam->receiveData[0] & 0x20	) >> 	5	;	//0b00000100
+	LED_red_Toggle;
 
 	if(emPoweroff)
 	{
@@ -56,15 +57,26 @@ void 	AssignData(struct _PacketParam* packetParam)
 
 
 }
-
-void 	Depack(struct _PacketParam* packetParam)
+void CheckPacketValidation(void)
 {
+	if(PacketChassis.syncBytesValid == true)
+	{
+
+		AssignData(&PacketChassis);
+		PacketChassis.syncBytesValid =false;
+	}
+}
+
+void 	CheckRecData(struct _PacketParam* packetParam)
+{
+
 
 	switch(packetParam->depackCounter)
 	{
 	case 0:
 		if(packetParam->receiveHeader==packetParam->firstHeader)
 		{
+
 			packetParam->depackCounter++;
 		}
 		else
@@ -79,6 +91,7 @@ void 	Depack(struct _PacketParam* packetParam)
 	case 1:
 		if(packetParam->receiveHeader==packetParam->secondHeader)
 		{
+
 			packetParam->depackCounter++;
 			HAL_UART_Receive_IT(packetParam->huart, packetParam->receiveData	, packetParam->receiveLenght);
 
@@ -100,9 +113,16 @@ void 	Depack(struct _PacketParam* packetParam)
 	case 2:
 
 
-		if( packetParam->receiveData[ packetParam->receiveLenght - 1 ] == '\r' )
-			AssignData(packetParam);
 
+		if( packetParam->receiveData[ packetParam->receiveLenght - 1 ] == '\r' )
+		{
+
+			packetParam->syncBytesValid = true;
+		}
+		else
+		{
+			packetParam->syncBytesValid = false;
+		}
 		packetParam->depackCounter=0;
 		HAL_UART_Receive_IT(packetParam->huart, &packetParam->receiveHeader, 1);
 
@@ -112,7 +132,7 @@ void 	Depack(struct _PacketParam* packetParam)
 }
 void 	HipHop(void)
 {
-	for(int i=0;i<8;i++)
+	for(int i=0;i<6;i++)
 	{
 		LED_blue_Toggle	;
 
@@ -139,7 +159,7 @@ void 	Shutdown(void)
 }
 void	SendShutdownReq(void)
 {
-//	Chassis_Transmit[0] |=	0x02;
+	//	Chassis_Transmit[0] |=	0x02;
 	Send2Chassis();
 }
 void 	CheckShutdown(void)

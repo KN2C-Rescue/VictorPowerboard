@@ -10,6 +10,7 @@
 
 
 #include "main.h"
+#include <stdbool.h>
 
 
 
@@ -53,10 +54,10 @@
 
 //size
 #define	Chassis_Transmit_len		10
-#define	Chassis_Recive_len			7
+#define	Chassis_Recive_len			5
 
 #define	PC_len		10		//Transmit
-#define	CP_len		7		//Receive
+#define	CP_len		3		//Receive
 
 
 //boolian States

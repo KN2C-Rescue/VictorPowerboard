@@ -21,7 +21,7 @@
 
 
 
-extern 	void 		Depack (struct _PacketParam* PacketParam);
+extern 	void 		CheckRecData (struct _PacketParam* PacketParam);
 extern 	void 		HipHop (void)	;
 extern	void 		AssignData (int PacketType)	;
 extern	void 		StopRobot (void)	;
@@ -32,7 +32,10 @@ extern	void 		PowerOff (void)	;
 extern	void 		PowerOn	(void)	;
 extern	void		SendShutdownReq	(void)	;
 extern	void 		CheckReset (void)	;
+extern 	void 		CheckPacketValidation(void);
 extern	void 		AdcConv (void)	;
+extern 	void 		SendPacket			(struct _PacketParam* packetParam);
+
 
 #endif
 

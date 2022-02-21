@@ -42,14 +42,15 @@ extern	uint16_t 	adcRaw[5];
 
 struct _PacketParam
 {
-	char firstHeader;
-	char secondHeader;
-	int depackCounter ;
-	int receiveLenght;
-	int transmitLenght;
-	uint8_t* receiveData;
-	uint8_t* transmitData;
-	uint8_t receiveHeader;
+	char 		firstHeader;
+	char 		secondHeader;
+	int 		depackCounter ;
+	int 		receiveLenght;
+	int 		transmitLenght;
+	uint8_t* 	receiveData;
+	uint8_t* 	transmitData;
+	uint8_t 	receiveHeader;
+	bool 		syncBytesValid;
 	UART_HandleTypeDef *huart;
 
 

@@ -74,9 +74,10 @@ void HAL_TIM_PeriodElapsedCallback	(TIM_HandleTypeDef *htim)
 }
 void HAL_UART_RxCpltCallback	(UART_HandleTypeDef *huart	)
 {
+	LED_blue_Toggle;
 	if(huart->Instance	==	UsartChassis)
 	{
-		Depack(&PacketChassis);
+		CheckRecData(&PacketChassis);
 	}
 
 
@@ -118,11 +119,13 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 	HipHop();
-	HAL_ADC_Start_DMA				(&hadc1,(uint32_t *)adcRaw,5)			;
-	HAL_TIM_Base_Start_IT		(&htim1)											;	//10 ms Timer
-
-	En_Arm_on;
-	En_Chassis_on;
+//	HAL_ADC_Start_DMA				(&hadc1,(uint32_t *)adcRaw,5)			;
+//	HAL_TIM_Base_Start_IT		(&htim1)											;	//10 ms Timer
+//
+//	En_Arm_on;
+//	En_Chassis_on;
+//
+	HAL_UART_Receive_IT		(PacketChassis.huart, &PacketChassis.receiveHeader , 1);
 
   /* USER CODE END 2 */
 
@@ -133,10 +136,15 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  	CheckPacketValidation();
 		HAL_Delay (1);
-		AdcConv();
-		CheckShutdown();
-		CheckReset();
+//		AdcConv();
+//		CheckShutdown();
+//		CheckReset();
+
+
+
+
   }
   /* USER CODE END 3 */
 }
